@@ -1,0 +1,6 @@
+.Tarea{
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+

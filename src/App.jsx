@@ -13,6 +13,16 @@ class App extends Component {
       listas: []
     }
   }
+  onKeyUpNombre = (e) => {
+    if(e.keyCode === 13) {
+      this.changeNameHandler();
+    }
+  }
+  onKeyUpLista = (e) => {
+    if(e.keyCode === 13) {
+      this.addNewNameHandler();
+    }
+  }
   handleInputChange = (e) => {
     this.setState({ addNewName: e.target.value })
   }
@@ -44,13 +54,58 @@ class App extends Component {
     });
   }
 
+  addNewTask=(taskName, listId)=>{
+    const nuevaTarea={
+      "taskId":this.generateId('task'),
+      "task":taskName,
+      "completed":false,
+      "color":"white",
+      "listId":listId
+    }
+
+    this.setState(prevState=>{
+      const nuevaLista=prevState.listas.map(lista=>{
+        if (lista.listID===listId) {
+          lista.tareas.push(nuevaTarea);
+        }
+        return lista;
+      })
+      return{listas:nuevaLista};
+    })
+  }
+  markAsCompleted(tareaId, listId, completedState) {
+    this.setState(prevState => {
+        let listasNuevas = prevState.listas.map(lista => {
+          if(lista.listID === listId) {
+            lista.tareas = lista.tareas.map(tarea => {
+              if(tarea.taskId === tareaId) {
+                tarea.completed = completedState;
+              }
+              return tarea;
+            })
+          }
+          return lista
+        }) ;
+        
+        return { listas: listasNuevas }
+      })
+  }
+  removeList(listId) {
+    this.setState(prevState => {
+      let listasNuevas = prevState.listas.filter( lista => lista.listID !== listId) ;
+      return { listas: listasNuevas }
+    })
+}
+
   render() {
     let listado;
     if (this.state.listas.length===0) {
       listado = <h4>No hay listas preparadas</h4>;
     } else {
       listado = this.state.listas.map(datosLista=>
-        <Lista key={datosLista.listID} name={datosLista.name}/>
+        <Lista key={datosLista.listID} data={datosLista} onHandleNewTask={this.addNewTask.bind(this)} 
+                  onHandleRemoveList={this.removeList.bind(this)}
+                  onHandleMarkAsCompleted={this.markAsCompleted.bind(this)}/>
       )
     }
     return (
@@ -62,14 +117,14 @@ class App extends Component {
             <div>
               <p>Personalizar Nombre:</p>
               <input type="text" value={this.state.addNewName} onChange={this.handleInputChange} />
-              <button onClick={this.changeNameHandler}>Cambiar Nombre</button>
+              <button onClick={this.changeNameHandler} onKeyUp={this.onKeyUpNombre}>Cambiar Nombre</button>
             </div>
             <div className="separacion">
             </div>
             <div>
               <p>Agregar una lista:</p>
               <input type="text" value={this.state.addNewListName} onChange={this.handleInputListChange} />
-              <button onClick={this.addNewNameHandler}>Crear Lista</button>
+              <button onClick={this.addNewNameHandler} onKeyUp={this.handleKeyUpLista}>Crear Lista</button>
             </div>
           </div>
         </header>
